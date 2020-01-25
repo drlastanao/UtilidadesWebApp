@@ -2,41 +2,60 @@
     ViewData["Title"] = "Utilidades Genéricas";
 }
 
-    <div class="text-center">
-        <form action="/Paradas/Cercanas" method="get">
-            <h1 class="display-3">Obteniendo su posición... <br />(pulse botón para detectar paradas)</h1>
-            <input type="text" class="form-control" name="posicion" id="posicion" placeholder="Obteniendo posición...">
+<div class="text-center">
+    <form action="/Paradas/Cercanas" method="get">
+        <h1 class="display-3">Obteniendo posición <br />(pulse para detectar paradas)</h1>
+        <div class="form-group mx-sm-3 mb-2">
+            <input type="text" class="form-control" name="parada" id="parada" placeholder="Parada o blancos para guardadas">
+        </div>
+
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="si" checked="checked" name="guardar" id="guardar">
+            <label class="form-check-label" for="guardar">
+                Guardar y posición actual
+            </label>
+        </div>
+        <div class="form-check">
             <button type="submit" id="Buscar" class="btn btn-success"> Buscar paradas</button>
-        </form>
-    </div>
+        </div>
+        <div class="form-check">
+            <div class="form-group mx-sm-3 mb-2">
+
+
+                <input type="text" class="form-control" name="posicion" id="posicion" placeholder="Obteniendo posición...">
+            </div>
+        </div>
+
+    </form>
+</div>
 
 
 <script type="text/javascript">
 
-  var output = document.getElementById("posicion");
-  var boton = document.getElementById("Buscar"); 
+    var output = document.getElementById("posicion");
+    var boton = document.getElementById("Buscar");
 
     boton.disabled = true;
 
-  if (!navigator.geolocation){
-    output.value = "<p>Geolocation is not supported by your browser</p>";
-  }
+    if (!navigator.geolocation) {
+        output.value = "<p>Geolocation is not supported by your browser</p>";
+    }
 
-  function success(position) {
-    var latitude  = position.coords.latitude;
-    var longitude = position.coords.longitude;
+    function success(position) {
+        var latitude = position.coords.latitude;
+        var longitude = position.coords.longitude;
 
-      output.value = latitude + '|' + longitude 
-      boton.disabled = false;
+        output.value = latitude + '|' + longitude
+        boton.disabled = false;
 
-  };
+    };
 
-  function error() {
-    output.value = "Unable to retrieve your location";
-  };
+    function error() {
+        output.value = "Unable to retrieve your location";
+    };
 
-  output.value = "<p>Locating…</p>";
+    output.value = "<p>Locating…</p>";
 
-  navigator.geolocation.getCurrentPosition(success, error);
+    navigator.geolocation.getCurrentPosition(success, error);
 
 </script>
