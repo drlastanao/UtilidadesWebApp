@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +12,12 @@ namespace UtilidadesWebApp.Controllers
 {
     public class ParadasController : Controller
     {
+        private readonly IHttpClientFactory _clientFactory;
+        public ParadasController(IHttpClientFactory clientFactory)
+        {
+            _clientFactory = clientFactory;
+        }
+
         // GET: Paradas
         public ActionResult Index()
         {
@@ -24,8 +31,22 @@ namespace UtilidadesWebApp.Controllers
 
             if (!string.IsNullOrEmpty(parada))
             {
-                TratarCookies(posicion, parada, guardar, cookie);
-                return new RedirectResult("http://zaragoza.avanzagrupo.com/frm_esquemaparadatime.php?poste=" + parada);
+                //return new RedirectResult("http://zaragoza.avanzagrupo.com/frm_esquemaparadatime.php?poste=" + parada);
+                var obj = OnGet(parada);
+                if (obj != null)
+                {
+                    var resultado = obj?.Result?.Result;
+                    if (resultado == null)
+                        return NotFound();
+
+                    var infoparada = JsonConvert.DeserializeObject<DetalleParada>(resultado);
+
+                    TratarCookies(infoparada.geometry.coordinates[1].ToString()+"|"+infoparada.geometry.coordinates[0].ToString(), parada, guardar, cookie);
+
+                    return View("Mostrar", infoparada);
+                }
+                else
+                    return NotFound();
             }
 
             if (cookie != null)
@@ -118,7 +139,28 @@ namespace UtilidadesWebApp.Controllers
 
             Response.Cookies.Append(key, value, option);
         }
-    }
 
+
+
+        public async Task<Task<string>> OnGet(string parada)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get,
+                "https://www.zaragoza.es/sede/servicio/urbanismo-infraestructuras/transporte-urbano/poste-autobus/tuzsa-" + parada + ".json");
+
+            var client = _clientFactory.CreateClient();
+
+            var response = await client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = response.Content.ReadAsStringAsync();
+                return responseStream;
+            }
+            else
+                return null;
+
+        }
+
+    }
 
 }

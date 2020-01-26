@@ -1,0 +1,15 @@
+﻿@{
+
+    ViewData["Title"] = "Mostrar tiempos";
+}
+
+    <div class="text-center">
+        Parada @Model.title: <br />
+        Tiempos:<br />
+        @foreach (var destino in Model.destinos)
+        {
+            <p>@destino.linea tiempo @destino.primero</p>
+        }
+
+
+    </div>
