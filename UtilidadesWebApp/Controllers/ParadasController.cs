@@ -41,7 +41,7 @@ namespace UtilidadesWebApp.Controllers
 
                     var infoparada = JsonConvert.DeserializeObject<DetalleParada>(resultado);
 
-                    TratarCookies(infoparada.geometry.coordinates[1].ToString()+"|"+infoparada.geometry.coordinates[0].ToString(), parada, guardar, cookie);
+                    TratarCookies(infoparada.geometry.coordinates[1].ToString() + "|" + infoparada.geometry.coordinates[0].ToString(), parada, guardar, cookie);
 
                     return View("Mostrar", infoparada);
                 }
@@ -61,27 +61,26 @@ namespace UtilidadesWebApp.Controllers
 
         private IOrderedEnumerable<Parada> OrdenarCookies(List<Parada> cookie, string posicion)
         {
-            float latitud = (posicion != null) ? float.Parse(posicion.Split('|')[0]) : 0;
-            float longitud = (posicion != null) ? float.Parse(posicion.Split('|')[1]) : 0;
+            posicion=posicion.Replace(".", ",");
+
+            double latitud = (posicion != null) ? double.Parse(posicion.Split('|')[0]) : 0;
+            double longitud = (posicion != null) ? float.Parse(posicion.Split('|')[1]) : 0;
 
 
             foreach (var parada in cookie)
             {
 
-                float difLatitud = parada.latitud - latitud;
-                float difLongitud = parada.longitud - longitud;
+                var R = 6371; // Radius of the earth in km
+                var dLat = deg2rad(parada.latitud - latitud);  // deg2rad below
+                var dLon = deg2rad(parada.longitud - longitud);
+                var a =
+                    Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(deg2rad(latitud)) * Math.Cos(deg2rad(parada.latitud)) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+                var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+                var d = R * c; // Distance in km
 
-
-                double a = Math.Sin(difLatitud / 2) * Math.Sin(difLatitud / 2) +
-                          Math.Cos(EnRadianes(latitud)) *
-                          Math.Cos(EnRadianes(parada.latitud)) *
-                          Math.Sin(difLongitud / 2) * Math.Sin(difLongitud / 2);
-                double diferencia = 1 - a;
-
-                double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(diferencia));
-
-
-                parada.distancia = (float)c;
+                parada.distancia = (float)d;
 
             }
 
@@ -89,10 +88,9 @@ namespace UtilidadesWebApp.Controllers
             var aux = cookie.OrderBy(x => x.distancia);
             return aux;
         }
-
-        static float EnRadianes(float valor)
+        public double deg2rad(double deg)
         {
-            return Convert.ToSingle(Math.PI / 180) * valor;
+            return deg * (Math.PI / 180);
         }
         private void TratarCookies(string posicion, string parada, string guardar, List<Parada> cookie)
         {

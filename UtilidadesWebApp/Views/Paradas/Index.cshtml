@@ -19,37 +19,8 @@
             <button type="submit" id="Buscar" class="btn btn-success"> Buscar paradas</button>
         </div>
         <div class="form-group mx-sm-3 mb-2">
-            <input type="text" class="form-control" name="posicion" id="posicion" placeholder="Obteniendo posición...">
+            <input type="text" class="form-control invisible" name="posicion" id="posicion" value="41.6510461|-0.917827">
         </div>
 
     </form>
 </div>
-
-
-<script type="text/javascript">
-
-    var output = document.getElementById("posicion");
-    var boton = document.getElementById("Buscar");
-
-    boton.disabled = true;
-
-    var endpoint = 'http://ip-api.com/json/?fields=status,message,lat,lon';
-
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-            var response = JSON.parse(this.responseText);
-            if (response.status !== 'success') {
-                output.value = 'query failed: ' + response.message;
-                return
-            }
-            else {
-                output.value = response.lat + '|' + response.lon;
-                boton.disabled = false;
-            }
-        }
-    };
-    xhr.open('GET', endpoint, true);
-    xhr.send();
-
-</script>
